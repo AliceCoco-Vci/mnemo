@@ -6,22 +6,33 @@ import 'app_theme_state.dart';
 class AppThemeController extends Notifier<AppThemeState> {
   @override
   AppThemeState build() {
-    final appTheme = BuiltInThemeFactory.createDefaultAppTheme();
+    // 创建内置 App Themes。
+    final lightTheme = BuiltInThemeFactory.createDefaultAppTheme();
 
-    final binding = BuiltInThemeFactory.createDefaultBinding();
+    final darkTheme = BuiltInThemeFactory.createDarkAppTheme();
+
+    // 创建内置 App Theme Bindings。
+    final lightBinding = BuiltInThemeFactory.createDefaultBinding();
+
+    final darkBinding = BuiltInThemeFactory.createDarkBinding();
 
     return AppThemeState(
-      themes: {appTheme.id: appTheme},
-      bindings: {binding.appThemeId: binding},
-      currentThemeId: appTheme.id,
+      themes: {lightTheme.id: lightTheme, darkTheme.id: darkTheme},
+      bindings: {
+        lightBinding.appThemeId: lightBinding,
+        darkBinding.appThemeId: darkBinding,
+      },
+      currentThemeId: BuiltInThemeFactory.defaultAppThemeId,
     );
   }
 
   /// 切换当前 App Theme。
-  ///
-  /// 如果主题不存在，则忽略本次操作。
   void selectTheme(String themeId) {
     if (!state.themes.containsKey(themeId)) {
+      return;
+    }
+
+    if (state.currentThemeId == themeId) {
       return;
     }
 
