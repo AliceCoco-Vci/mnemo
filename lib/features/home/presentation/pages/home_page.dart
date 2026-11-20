@@ -29,31 +29,19 @@ class _HomePageState extends ConsumerState<HomePage>
     ...DataSpaceGroup.values.map((group) => group.label),
   ];
 
+  /// 根据 Tab 索引得到对应分组，0 表示全部。
+  DataSpaceGroup? _groupForIndex(int index) =>
+      index == 0 ? null : DataSpaceGroup.values[index - 1];
+
   @override
   void initState() {
     super.initState();
 
     _tabController = TabController(length: _groups.length, vsync: this);
-
-    _tabController.addListener(_handleTabChange);
-  }
-
-  /// 同步 Tab 选择与 Home Provider 状态。
-  void _handleTabChange() {
-    if (_tabController.indexIsChanging) return;
-
-    _selectGroup(_tabController.index);
-  }
-
-  void _selectGroup(int index) {
-    final group = index == 0 ? null : DataSpaceGroup.values[index - 1];
-
-    ref.read(homeProvider.notifier).selectGroup(group);
   }
 
   @override
   void dispose() {
-    _tabController.removeListener(_handleTabChange);
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -87,7 +75,6 @@ class _HomePageState extends ConsumerState<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    final dataSpaces = ref.watch(filteredDataSpacesProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -136,9 +123,30 @@ class _HomePageState extends ConsumerState<HomePage>
                 tabs: _groups.map((group) => Tab(text: group)).toList(),
               ),
             ),
-          Expanded(child: _buildHomeContent(dataSpaces)),
+          Expanded(child: _buildBody()),
         ],
       ),
+    );
+  }
+
+  /// Home 主体内容。
+  ///
+  /// 搜索时展示跨分组搜索结果；否则通过 [TabBarView] 支持左右滑动切换分组。
+  Widget _buildBody() {
+    if (_searching) {
+      return _buildHomeContent(
+        ref.watch(filteredDataSpacesProvider(null)),
+      );
+    }
+
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        for (var i = 0; i < _groups.length; i++)
+          _buildHomeContent(
+            ref.watch(filteredDataSpacesProvider(_groupForIndex(i))),
+          ),
+      ],
     );
   }
 
