@@ -1,69 +1,56 @@
-import '../models/app_theme_binding.dart';
-import '../models/data_space_appearance.dart';
-import '../models/data_space_theme_definition.dart';
 import '../enums/theme_binding_mode.dart';
+import '../models/data_space_theme_preference.dart';
+import '../models/data_space_theme_definition.dart';
 
+/// DataSpace Theme 解析器。
+///
+/// 只负责根据 DataSpace 的主题偏好解析最终使用的主题。
+///
+/// - follow：使用 App Theme 层传入的绑定主题。
+/// - custom：使用 DataSpace 自己指定的主题。
+///
+/// 不负责处理 App Theme 的日夜模式。
 class DataSpaceThemeResolver {
   const DataSpaceThemeResolver();
 
-  /// 解析 DataSpace 最终使用的主题。
-  ///
-  /// Follow:
-  /// 根据当前 App Theme 找到绑定的 DataSpace Theme。
-  ///
-  /// Custom:
-  /// 根据 customThemeId 找到指定主题。
-  ///
-  /// 如果找不到对应主题，则返回默认 DataSpace Theme。
   DataSpaceThemeDefinition resolve({
-    required DataSpaceAppearance appearance,
-    required String currentAppThemeId,
-    required Map<String, AppThemeBinding> appThemeBindings,
+    required DataSpaceThemePreference preference,
+
+    /// App Theme 层根据当前 Appearance 选出的 DataSpace Theme ID。
+    required String? boundDataSpaceThemeId,
+
     required Map<String, DataSpaceThemeDefinition> themes,
     required DataSpaceThemeDefinition defaultTheme,
   }) {
-    switch (appearance.mode) {
+    switch (preference.mode) {
       case ThemeBindingMode.follow:
-        return _resolveFollow(
-          appThemeId: currentAppThemeId,
-          appThemeBindings: appThemeBindings,
+        return _resolveTheme(
+          themeId: boundDataSpaceThemeId,
           themes: themes,
           defaultTheme: defaultTheme,
         );
 
       case ThemeBindingMode.custom:
-        return _resolveCustom(
-          customThemeId: appearance.customThemeId,
+        return _resolveTheme(
+          themeId: preference.customThemeId,
           themes: themes,
           defaultTheme: defaultTheme,
         );
     }
   }
 
-  DataSpaceThemeDefinition _resolveFollow({
-    required String appThemeId,
-    required Map<String, AppThemeBinding> appThemeBindings,
+  /// 根据主题 ID 获取主题。
+  ///
+  /// ID 为空或主题不存在时，使用默认主题。
+  DataSpaceThemeDefinition _resolveTheme({
+    required String? themeId,
     required Map<String, DataSpaceThemeDefinition> themes,
     required DataSpaceThemeDefinition defaultTheme,
   }) {
-    final binding = appThemeBindings[appThemeId];
-
-    if (binding == null) {
+    if (themeId == null) {
       return defaultTheme;
     }
 
-    return themes[binding.dataSpaceThemeId] ?? defaultTheme;
-  }
-
-  DataSpaceThemeDefinition _resolveCustom({
-    required String? customThemeId,
-    required Map<String, DataSpaceThemeDefinition> themes,
-    required DataSpaceThemeDefinition defaultTheme,
-  }) {
-    if (customThemeId == null) {
-      return defaultTheme;
-    }
-
-    return themes[customThemeId] ?? defaultTheme;
+    return themes[themeId] ?? defaultTheme;
   }
 }

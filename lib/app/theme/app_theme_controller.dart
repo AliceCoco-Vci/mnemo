@@ -1,28 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme/models/app_theme_mode.dart';
 import '../../features/theme/domain/factories/built_in_theme_factory.dart';
 import 'app_theme_state.dart';
 
+/// 管理 App Theme 的选择和显示模式。
 class AppThemeController extends Notifier<AppThemeState> {
   @override
   AppThemeState build() {
-    // 创建内置 App Themes。
-    final lightTheme = BuiltInThemeFactory.createDefaultAppTheme();
+    // 创建内置 App Theme。
+    // 一套 App Theme 内部包含 Light 和 Dark 两套 Appearance。
+    final defaultTheme = BuiltInThemeFactory.createDefaultAppTheme();
 
-    final darkTheme = BuiltInThemeFactory.createDarkAppTheme();
-
-    // 创建内置 App Theme Bindings。
-    final lightBinding = BuiltInThemeFactory.createDefaultBinding();
-
-    final darkBinding = BuiltInThemeFactory.createDarkBinding();
+    // 创建该 App Theme 对应的 Light / Dark DataSpace Theme 绑定。
+    final defaultBinding = BuiltInThemeFactory.createDefaultBinding();
 
     return AppThemeState(
-      themes: {lightTheme.id: lightTheme, darkTheme.id: darkTheme},
-      bindings: {
-        lightBinding.appThemeId: lightBinding,
-        darkBinding.appThemeId: darkBinding,
-      },
-      currentThemeId: BuiltInThemeFactory.defaultAppThemeId,
+      themes: {defaultTheme.id: defaultTheme},
+      bindings: {defaultBinding.appThemeId: defaultBinding},
+      currentThemeId: defaultTheme.id,
+      mode: AppThemeMode.system,
     );
   }
 
@@ -37,5 +34,14 @@ class AppThemeController extends Notifier<AppThemeState> {
     }
 
     state = state.copyWith(currentThemeId: themeId);
+  }
+
+  /// 修改 App Theme 的显示模式。
+  void setMode(AppThemeMode mode) {
+    if (state.mode == mode) {
+      return;
+    }
+
+    state = state.copyWith(mode: mode);
   }
 }

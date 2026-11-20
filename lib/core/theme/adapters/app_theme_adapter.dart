@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../../features/theme/domain/models/app_theme_definition.dart';
+import '../../../features/theme/domain/models/app_theme_appearance.dart';
 import 'flutter_theme_adapter.dart';
 
+/// 将 App Theme Appearance 转换为 Flutter ThemeData。
+///
+/// 只负责适配，不负责选择主题或判断日夜模式。
 class AppThemeAdapter {
   const AppThemeAdapter();
 
-  ThemeData adapt(AppThemeDefinition definition) {
-    final colors = definition.colors;
-    final typography = definition.typography;
+  ThemeData adapt(
+    AppThemeAppearance appearance, {
+    required Brightness brightness,
+  }) {
+    final colors = appearance.colors;
+    final typography = appearance.typography;
 
     final primary = FlutterThemeAdapter.toColor(colors.primary);
     final secondary = FlutterThemeAdapter.toColor(colors.secondary);
@@ -18,10 +24,10 @@ class AppThemeAdapter {
     final textPrimary = FlutterThemeAdapter.toColor(colors.textPrimary);
     final textSecondary = FlutterThemeAdapter.toColor(colors.textSecondary);
 
-    final isDark = background.computeLuminance() < 0.5;
-
+    // 根据明确传入的亮度构建 ColorScheme。
     final ColorScheme colorScheme;
-    if (isDark) {
+
+    if (brightness == Brightness.dark) {
       colorScheme = ColorScheme.dark(
         primary: primary,
         secondary: secondary,
@@ -51,6 +57,7 @@ class AppThemeAdapter {
 
     return ThemeData(
       useMaterial3: true,
+      brightness: brightness,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: background,
       dividerColor: FlutterThemeAdapter.toColor(colors.divider),
