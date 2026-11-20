@@ -15,24 +15,46 @@ class AppThemeAdapter {
     final background = FlutterThemeAdapter.toColor(colors.background);
     final surface = FlutterThemeAdapter.toColor(colors.surface);
     final error = FlutterThemeAdapter.toColor(colors.error);
+    final textPrimary = FlutterThemeAdapter.toColor(colors.textPrimary);
+    final textSecondary = FlutterThemeAdapter.toColor(colors.textSecondary);
 
-    return ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.light(
+    final isDark = background.computeLuminance() < 0.5;
+
+    final ColorScheme colorScheme;
+    if (isDark) {
+      colorScheme = ColorScheme.dark(
         primary: primary,
         secondary: secondary,
         surface: surface,
         error: error,
-      ),
+        onSurface: textPrimary,
+        onSurfaceVariant: textSecondary,
+      );
+    } else {
+      colorScheme = ColorScheme.light(
+        primary: primary,
+        secondary: secondary,
+        surface: surface,
+        error: error,
+        onSurface: textPrimary,
+        onSurfaceVariant: textSecondary,
+      );
+    }
+
+    final textTheme = TextTheme(
+      headlineSmall: FlutterThemeAdapter.toTextStyle(typography.heading),
+      titleMedium: FlutterThemeAdapter.toTextStyle(typography.title),
+      bodyMedium: FlutterThemeAdapter.toTextStyle(typography.body),
+      bodySmall: FlutterThemeAdapter.toTextStyle(typography.caption),
+      labelLarge: FlutterThemeAdapter.toTextStyle(typography.button),
+    ).apply(bodyColor: textPrimary, displayColor: textPrimary);
+
+    return ThemeData(
+      useMaterial3: true,
+      colorScheme: colorScheme,
       scaffoldBackgroundColor: background,
       dividerColor: FlutterThemeAdapter.toColor(colors.divider),
-      textTheme: TextTheme(
-        headlineSmall: FlutterThemeAdapter.toTextStyle(typography.heading),
-        titleMedium: FlutterThemeAdapter.toTextStyle(typography.title),
-        bodyMedium: FlutterThemeAdapter.toTextStyle(typography.body),
-        bodySmall: FlutterThemeAdapter.toTextStyle(typography.caption),
-        labelLarge: FlutterThemeAdapter.toTextStyle(typography.button),
-      ),
+      textTheme: textTheme,
     );
   }
 }
