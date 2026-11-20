@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'theme/app_theme_provider.dart';
-import '../features/home/presentation/pages/home_page.dart';
+import 'navigation/app_scaffold.dart';
 
 class MnemoApp extends ConsumerWidget {
   const MnemoApp({super.key});
@@ -15,7 +15,7 @@ class MnemoApp extends ConsumerWidget {
       title: 'Mnemo',
       debugShowCheckedModeBanner: false,
       theme: theme,
-      home: const HomePage(),
+      home: const AppScaffold(),
     );
   }
 }

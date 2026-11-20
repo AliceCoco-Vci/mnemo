@@ -5,7 +5,7 @@ import '../../../data_space/domain/models/data_space.dart';
 import '../providers/home_provider.dart';
 import '../widgets/add_data_space_card.dart';
 import '../widgets/data_space_card.dart';
-import '../widgets/profile_view.dart';
+import '../../../../app/navigation/widgets/app_top_bar.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -19,7 +19,6 @@ class _HomePageState extends ConsumerState<HomePage>
   late final TabController _tabController;
 
   bool _searching = false;
-  int _currentIndex = 0;
 
   final TextEditingController _searchController = TextEditingController();
 
@@ -92,82 +91,52 @@ class _HomePageState extends ConsumerState<HomePage>
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: _currentIndex == 0
-          ? AppBar(
-              title: _searching
-                  ? TextField(
-                      controller: _searchController,
-                      autofocus: true,
-                      decoration: const InputDecoration(
-                        hintText: 'Search DataSpaces',
-                        border: InputBorder.none,
-                      ),
-                      onChanged: (value) {
-                        ref
-                            .read(homeProvider.notifier)
-                            .updateSearchQuery(value);
-                      },
-                    )
-                  : const Text('Mnemo'),
-              actions: [
-                IconButton(
-                  onPressed: _toggleSearch,
-                  icon: Icon(
-                    _searching ? Icons.close_rounded : Icons.search_rounded,
-                  ),
+      appBar: AppTopBar(
+        title: _searching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  hintText: 'Search DataSpaces',
+                  border: InputBorder.none,
                 ),
-                const SizedBox(width: 8),
-              ],
-            )
-          : null,
-
-      body: _currentIndex == 0
-          ? Column(
-              children: [
-                if (!_searching)
-                  Material(
-                    color: Colors.transparent,
-                    child: TabBar(
-                      controller: _tabController,
-                      isScrollable: true,
-                      tabAlignment: TabAlignment.start,
-                      dividerColor: Colors.transparent,
-                      labelStyle: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                      unselectedLabelStyle: theme.textTheme.titleLarge
-                          ?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                      labelColor: theme.colorScheme.primary,
-                      unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
-                      indicatorColor: theme.colorScheme.primary,
-                      tabs: _groups.map((group) => Tab(text: group)).toList(),
-                    ),
-                  ),
-                Expanded(child: _buildHomeContent(dataSpaces)),
-              ],
-            )
-          : const ProfileView(),
-
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
+                onChanged: (value) {
+                  ref.read(homeProvider.notifier).updateSearchQuery(value);
+                },
+              )
+            : const Text('Mnemo'),
+        actions: [
+          IconButton(
+            onPressed: _toggleSearch,
+            icon: Icon(_searching ? Icons.close_rounded : Icons.search_rounded),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
-          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+
+      body: Column(
+        children: [
+          if (!_searching)
+            Material(
+              color: Colors.transparent,
+              child: TabBar(
+                controller: _tabController,
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                dividerColor: Colors.transparent,
+                labelStyle: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+                unselectedLabelStyle: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+                labelColor: theme.colorScheme.primary,
+                unselectedLabelColor: theme.colorScheme.onSurfaceVariant,
+                indicatorColor: theme.colorScheme.primary,
+                tabs: _groups.map((group) => Tab(text: group)).toList(),
+              ),
+            ),
+          Expanded(child: _buildHomeContent(dataSpaces)),
         ],
       ),
     );
